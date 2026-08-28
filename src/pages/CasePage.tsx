@@ -8,6 +8,8 @@ import { Page } from "../components/Page";
 import { TextField } from "../components/TextField";
 import { useCaseQuery, useCompleteFactFindMutation } from "../hooks/useCases";
 import styles from "./CasePage.module.css";
+import { ListSkeleton } from "../components/ListSkeleton";
+import { QueryError } from "../components/QueryError";
 
 export function CasePage() {
   const { caseId } = useParams();
@@ -20,11 +22,13 @@ export function CasePage() {
   const loadError =
     queryError instanceof ApiError && queryError.status === 404
       ? "This case was not found for your brokerage."
-      : caseQuery.isError && !(queryError instanceof ApiError && queryError.status === 401)
+      : caseQuery.isError &&
+          !(queryError instanceof ApiError && queryError.status === 401)
         ? "Could not load this case. Is Origination reachable?"
         : null;
   const saveError =
-    factFindMutation.isError && !(mutationError instanceof ApiError && mutationError.status === 401)
+    factFindMutation.isError &&
+    !(mutationError instanceof ApiError && mutationError.status === 401)
       ? "Could not save the fact-find."
       : null;
 
@@ -44,22 +48,62 @@ export function CasePage() {
   return (
     <Page title="Case">
       {caseQuery.isPending ? (
-        <p>Loading…</p>
+        <ListSkeleton rows={3} />
       ) : loadError ? (
-        <Alert>{loadError}</Alert>
+        <QueryError
+          message={loadError}
+          onRetry={() => {
+            void caseQuery.refetch();
+          }}
+        />
       ) : caseItem ? (
         <>
-          <span className={styles.status}>{caseItem.status}</span>
-          <p className={styles.notes}>{caseItem.inquiryNotes.trim() || "No inquiry notes."}</p>
+          <span className={styles.status}>
+            {caseItem.status}
+            {caseQuery.isFetching && !caseQuery.isPending ? (
+              <span className={styles.updating}> Updating…</span>
+            ) : null}
+          </span>
+          <p className={styles.notes}>
+            {caseItem.inquiryNotes.trim() || "No inquiry notes."}
+          </p>
           {saveError ? <Alert>{saveError}</Alert> : null}
 
           {caseItem.status === "Inquiry" ? (
             <Form onSubmit={onCompleteFactFind}>
               <TextField label="Objectives" name="objectives" required />
-              <TextField label="Income" name="income" type="number" min={0} step="0.01" required />
-              <TextField label="Expenses" name="expenses" type="number" min={0} step="0.01" required />
-              <TextField label="Assets" name="assets" type="number" min={0} step="0.01" required />
-              <TextField label="Debts" name="debts" type="number" min={0} step="0.01" required />
+              <TextField
+                label="Income"
+                name="income"
+                type="number"
+                min={0}
+                step="0.01"
+                required
+              />
+              <TextField
+                label="Expenses"
+                name="expenses"
+                type="number"
+                min={0}
+                step="0.01"
+                required
+              />
+              <TextField
+                label="Assets"
+                name="assets"
+                type="number"
+                min={0}
+                step="0.01"
+                required
+              />
+              <TextField
+                label="Debts"
+                name="debts"
+                type="number"
+                min={0}
+                step="0.01"
+                required
+              />
               <Button type="submit" disabled={factFindMutation.isPending}>
                 {factFindMutation.isPending ? "Saving…" : "Complete fact-find"}
               </Button>
@@ -77,7 +121,9 @@ export function CasePage() {
               <dt>Debts</dt>
               <dd>{caseItem.factFind.debts}</dd>
               <dt>Completed</dt>
-              <dd>{new Date(caseItem.factFind.completedAt).toLocaleString()}</dd>
+              <dd>
+                {new Date(caseItem.factFind.completedAt).toLocaleString()}
+              </dd>
             </dl>
           ) : null}
         </>

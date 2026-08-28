@@ -14,6 +14,12 @@
   margin-top: var(--space-6);
 }
 
+.updating {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-normal);
+  color: var(--color-muted);
+}
+
 .facts {
   margin: var(--space-4) 0 0;
   display: grid;

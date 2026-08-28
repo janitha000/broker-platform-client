@@ -8,6 +8,9 @@ import { Page } from "../components/Page";
 import { TextField } from "../components/TextField";
 import { useCaseListQuery, useCreateCaseMutation } from "../hooks/useCases";
 import styles from "./HomePage.module.css";
+import { EmptyState } from "../components/EmptyState";
+import { ListSkeleton } from "../components/ListSkeleton";
+import { QueryError } from "../components/QueryError";
 
 export function HomePage() {
   const { user, signOut } = useAuth();
@@ -17,12 +20,16 @@ export function HomePage() {
 
   const cases = casesQuery.data ?? [];
   const listError =
-    casesQuery.isError && !(casesQuery.error instanceof ApiError && casesQuery.error.status === 401)
+    casesQuery.isError &&
+    !(casesQuery.error instanceof ApiError && casesQuery.error.status === 401)
       ? "Could not load cases. Is Origination reachable?"
       : null;
   const createError =
     createCaseMutation.isError &&
-    !(createCaseMutation.error instanceof ApiError && createCaseMutation.error.status === 401)
+    !(
+      createCaseMutation.error instanceof ApiError &&
+      createCaseMutation.error.status === 401
+    )
       ? "Could not create a case. Is Origination reachable?"
       : null;
 
@@ -33,7 +40,9 @@ export function HomePage() {
       <Form
         onSubmit={(event) => {
           event.preventDefault();
-          const notes = String(new FormData(event.currentTarget).get("inquiryNotes") ?? "");
+          const notes = String(
+            new FormData(event.currentTarget).get("inquiryNotes") ?? "",
+          );
           createCaseMutation.mutate(notes, {
             onSuccess: (created) => navigate(`/cases/${created.caseId}`),
           });
@@ -45,14 +54,27 @@ export function HomePage() {
         </Button>
       </Form>
 
-      {listError ? <Alert>{listError}</Alert> : null}
       {createError ? <Alert>{createError}</Alert> : null}
 
-      <h2 className={styles.heading}>Cases</h2>
+      <h2 className={styles.heading}>
+        Cases
+        {casesQuery.isFetching && !casesQuery.isPending ? (
+          <span className={styles.updating}> Updating…</span>
+        ) : null}
+      </h2>
       {casesQuery.isPending ? (
-        <p>Loading…</p>
+        <ListSkeleton rows={5} />
+      ) : listError ? (
+        <QueryError
+          message={listError}
+          onRetry={() => {
+            void casesQuery.refetch();
+          }}
+        />
       ) : cases.length === 0 ? (
-        <p>No cases for this brokerage yet.</p>
+        <EmptyState title="No cases for this brokerage yet.">
+          Create a new case to get started.
+        </EmptyState>
       ) : (
         <ul className={styles.list}>
           {cases.map((item) => (
