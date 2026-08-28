@@ -8,9 +8,10 @@
  * - This file is the only place that knows Identity's paths and JSON shapes.
  */
 
-import { request } from './http';
+import { request } from "./http";
 
-const identityUrl = import.meta.env.VITE_IDENTITY_API_URL ?? 'http://localhost:5250';
+const identityUrl =
+  import.meta.env.VITE_IDENTITY_API_URL ?? "http://localhost:5250";
 
 export type AuthUser = {
   tenantId: string;
@@ -19,16 +20,20 @@ export type AuthUser = {
   accessToken: string;
 };
 
-export function registerTenant(name: string, email: string, password: string): Promise<AuthUser> {
-  return request<AuthUser>(identityUrl, '/auth/register', {
-    method: 'POST',
+export function registerTenant(
+  name: string,
+  email: string,
+  password: string,
+): Promise<AuthUser> {
+  return request<AuthUser>(identityUrl, "/auth/register", {
+    method: "POST",
     body: { name, email, password },
   });
 }
 
 export function login(email: string, password: string): Promise<AuthUser> {
-  return request<AuthUser>(identityUrl, '/auth/login', {
-    method: 'POST',
+  return request<AuthUser>(identityUrl, "/auth/login", {
+    method: "POST",
     body: { email, password },
   });
 }
