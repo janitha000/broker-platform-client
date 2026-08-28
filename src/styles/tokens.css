@@ -1,10 +1,12 @@
 /*
   Design tokens — the only place colour, space, and type are defined.
-  Pages and (later) Button/Input must use these names, not raw hex.
-  A second theme later: [data-theme="dark"] { --color-bg: ... }
+  Pages and components use these names, not raw hex.
+  Dark theme: set data-theme="dark" on <html>; only colour (and shadow) change.
 */
 
 :root {
+  color-scheme: light;
+
   /* Colour — white canvas; surface is a light grey panel on that canvas */
   --color-bg: #ffffff;
   --color-surface: #f7f8fa;
@@ -45,4 +47,22 @@
   /* Shape */
   --radius: 0.375rem;
   --shadow: 0 1px 2px rgb(28 36 48 / 8%);
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --color-bg: #111827;
+  --color-surface: #1f2937;
+  --color-text: #d1d5db;
+  --color-heading: #f9fafb;
+  --color-muted: #9ca3af;
+  --color-border: #374151;
+  --color-accent: #3d9b6e;
+  --color-accent-hover: #4aad7e;
+  --color-on-accent: #ffffff;
+  --color-danger: #f97066;
+  --color-danger-bg: #3f1c19;
+  --color-focus: #3d9b6e;
+  --shadow: 0 1px 2px rgb(0 0 0 / 40%);
 }
