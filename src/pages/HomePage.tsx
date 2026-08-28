@@ -1,89 +1,55 @@
-import { useEffect, useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ApiError } from "../api/http";
-import { createCase, listCases, type CaseListItem } from "../api/origination";
 import { useAuth } from "../auth/AuthContext";
 import { Alert } from "../components/Alert";
 import { Button } from "../components/Button";
 import { Form } from "../components/Form";
 import { Page } from "../components/Page";
 import { TextField } from "../components/TextField";
+import { useCaseListQuery, useCreateCaseMutation } from "../hooks/useCases";
 import styles from "./HomePage.module.css";
 
 export function HomePage() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
-  const [cases, setCases] = useState<CaseListItem[]>([]);
-  const [notes, setNotes] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [pending, setPending] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const casesQuery = useCaseListQuery();
+  const createCaseMutation = useCreateCaseMutation();
 
-  useEffect(() => {
-    let cancelled = false;
-
-    async function load() {
-      try {
-        const result = await listCases(user!.accessToken);
-        if (!cancelled) {
-          setCases(result.cases);
-          setError(null);
-        }
-      } catch (caught) {
-        if (cancelled) return;
-        if (caught instanceof ApiError && caught.status === 401) {
-          signOut();
-          return;
-        }
-        setError("Could not load cases. Is Origination reachable?");
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    }
-
-    void load();
-    return () => {
-      cancelled = true;
-    };
-  }, [user, signOut]);
-
-  async function onCreate(event: FormEvent) {
-    event.preventDefault();
-    setError(null);
-    setPending(true);
-    try {
-      const created = await createCase(user!.accessToken, notes);
-      navigate(`/cases/${created.caseId}`);
-    } catch (caught) {
-      if (caught instanceof ApiError && caught.status === 401) {
-        signOut();
-        return;
-      }
-      setError("Could not create a case. Is Origination reachable?");
-    } finally {
-      setPending(false);
-    }
-  }
+  const cases = casesQuery.data ?? [];
+  const listError =
+    casesQuery.isError && !(casesQuery.error instanceof ApiError && casesQuery.error.status === 401)
+      ? "Could not load cases. Is Origination reachable?"
+      : null;
+  const createError =
+    createCaseMutation.isError &&
+    !(createCaseMutation.error instanceof ApiError && createCaseMutation.error.status === 401)
+      ? "Could not create a case. Is Origination reachable?"
+      : null;
 
   return (
     <Page title="Broker">
       <p>Signed in as {user?.email}</p>
 
-      <Form onSubmit={onCreate}>
-        <TextField
-          label="New inquiry"
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-        />
-        <Button type="submit" disabled={pending}>
-          {pending ? "Creating…" : "Create case"}
+      <Form
+        onSubmit={(event) => {
+          event.preventDefault();
+          const notes = String(new FormData(event.currentTarget).get("inquiryNotes") ?? "");
+          createCaseMutation.mutate(notes, {
+            onSuccess: (created) => navigate(`/cases/${created.caseId}`),
+          });
+        }}
+      >
+        <TextField label="New inquiry" name="inquiryNotes" />
+        <Button type="submit" disabled={createCaseMutation.isPending}>
+          {createCaseMutation.isPending ? "Creating…" : "Create case"}
         </Button>
       </Form>
 
-      {error ? <Alert>{error}</Alert> : null}
+      {listError ? <Alert>{listError}</Alert> : null}
+      {createError ? <Alert>{createError}</Alert> : null}
 
       <h2 className={styles.heading}>Cases</h2>
-      {loading ? (
+      {casesQuery.isPending ? (
         <p>Loading…</p>
       ) : cases.length === 0 ? (
         <p>No cases for this brokerage yet.</p>

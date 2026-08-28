@@ -1,43 +1,48 @@
-/**
- * Shared HTTP helper. No React — just fetch.
- *
- * Why this file exists:
- * - Pages should not copy-paste fetch + JSON + error handling.
- * - Origination (Slice 2) will reuse the same helper with a different base URL.
- */
-
 export class ApiError extends Error {
   readonly status: number;
 
   constructor(status: number, message: string) {
     super(message);
-    this.name = 'ApiError';
+    this.name = "ApiError";
     this.status = status;
   }
 }
 
+type UnauthorizedHandler = () => void;
+
+let unauthorizedHandler: UnauthorizedHandler | undefined;
+
+export function setUnauthorizedHandler(handler: UnauthorizedHandler | undefined) {
+  unauthorizedHandler = handler;
+}
+
 type RequestOptions = {
-  method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
+  method?: "GET" | "POST" | "PUT" | "DELETE";
   body?: unknown;
   token?: string;
 };
 
 export async function request<T>(baseUrl: string, path: string, options: RequestOptions = {}): Promise<T> {
-  const url = `${baseUrl.replace(/\/$/, '')}${path}`;
+  const url = `${baseUrl.replace(/\/$/, "")}${path}`;
 
   const headers = new Headers();
   if (options.body !== undefined) {
-    headers.set('Content-Type', 'application/json');
+    headers.set("Content-Type", "application/json");
   }
   if (options.token) {
-    headers.set('Authorization', `Bearer ${options.token}`);
+    headers.set("Authorization", `Bearer ${options.token}`);
   }
 
   const response = await fetch(url, {
-    method: options.method ?? 'GET',
+    method: options.method ?? "GET",
     headers,
     body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
   });
+
+  if (response.status === 401) {
+    unauthorizedHandler?.();
+    throw new ApiError(401, response.statusText);
+  }
 
   if (!response.ok) {
     throw new ApiError(response.status, response.statusText);
