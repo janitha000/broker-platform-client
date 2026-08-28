@@ -12,30 +12,33 @@ type UnauthorizedHandler = () => void;
 
 let unauthorizedHandler: UnauthorizedHandler | undefined;
 
-export function setUnauthorizedHandler(handler: UnauthorizedHandler | undefined) {
+export function setUnauthorizedHandler(
+  handler: UnauthorizedHandler | undefined,
+) {
   unauthorizedHandler = handler;
 }
 
 type RequestOptions = {
   method?: "GET" | "POST" | "PUT" | "DELETE";
   body?: unknown;
-  token?: string;
 };
 
-export async function request<T>(baseUrl: string, path: string, options: RequestOptions = {}): Promise<T> {
+export async function request<T>(
+  baseUrl: string,
+  path: string,
+  options: RequestOptions = {},
+): Promise<T> {
   const url = `${baseUrl.replace(/\/$/, "")}${path}`;
 
   const headers = new Headers();
   if (options.body !== undefined) {
     headers.set("Content-Type", "application/json");
   }
-  if (options.token) {
-    headers.set("Authorization", `Bearer ${options.token}`);
-  }
 
   const response = await fetch(url, {
     method: options.method ?? "GET",
     headers,
+    credentials: "include",
     body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
   });
 

@@ -88,7 +88,7 @@ export function HomePage() {
         </ul>
       )}
 
-      <Button variant="secondary" onClick={signOut}>
+      <Button variant="secondary" onClick={() => void signOut()}>
         Sign out
       </Button>
     </Page>

@@ -9,13 +9,17 @@ import { Page } from "../components/Page";
 import { TextField } from "../components/TextField";
 
 export function RegisterPage() {
-  const { user, register } = useAuth();
+  const { user, ready, register } = useAuth();
   const navigate = useNavigate();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+
+  if (!ready) {
+    return null;
+  }
 
   if (user) {
     return <Navigate to="/" replace />;
@@ -32,7 +36,7 @@ export function RegisterPage() {
       if (caught instanceof ApiError && caught.status === 409) {
         setError("That email is already registered.");
       } else {
-        setError("Could not register. Is Identity running on port 5250?");
+        setError("Could not register. Is Identity running?");
       }
     } finally {
       setPending(false);

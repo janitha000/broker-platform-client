@@ -5,33 +5,30 @@ import { useAuth } from "../auth/AuthContext";
 
 export function useCaseListQuery() {
   const { user } = useAuth();
-  const token = user?.accessToken;
 
   return useQuery({
     queryKey: caseKeys.list(),
-    queryFn: () => listCases(token!),
-    enabled: Boolean(token),
+    queryFn: () => listCases(),
+    enabled: Boolean(user),
     select: (result) => result.cases,
   });
 }
 
 export function useCaseQuery(caseId: string | undefined) {
   const { user } = useAuth();
-  const token = user?.accessToken;
 
   return useQuery({
     queryKey: caseKeys.detail(caseId ?? ""),
-    queryFn: () => getCase(token!, caseId!),
-    enabled: Boolean(token && caseId),
+    queryFn: () => getCase(caseId!),
+    enabled: Boolean(user && caseId),
   });
 }
 
 export function useCreateCaseMutation() {
-  const { user } = useAuth();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (inquiryNotes: string) => createCase(user!.accessToken, inquiryNotes),
+    mutationFn: (inquiryNotes: string) => createCase(inquiryNotes),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: caseKeys.list() });
     },
@@ -39,7 +36,6 @@ export function useCreateCaseMutation() {
 }
 
 export function useCompleteFactFindMutation(caseId: string) {
-  const { user } = useAuth();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -49,7 +45,7 @@ export function useCompleteFactFindMutation(caseId: string) {
       expenses: number;
       assets: number;
       debts: number;
-    }) => completeFactFind(user!.accessToken, caseId, factFind),
+    }) => completeFactFind(caseId, factFind),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: caseKeys.detail(caseId) });
       void queryClient.invalidateQueries({ queryKey: caseKeys.list() });

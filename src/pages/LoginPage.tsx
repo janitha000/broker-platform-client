@@ -9,12 +9,16 @@ import { Page } from "../components/Page";
 import { TextField } from "../components/TextField";
 
 export function LoginPage() {
-  const { user, signIn } = useAuth();
+  const { user, ready, signIn } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+
+  if (!ready) {
+    return null;
+  }
 
   if (user) {
     return <Navigate to="/" replace />;
@@ -31,7 +35,7 @@ export function LoginPage() {
       if (caught instanceof ApiError && caught.status === 401) {
         setError("Email or password is wrong.");
       } else {
-        setError("Could not sign in. Is Identity running on port 5250?");
+        setError("Could not sign in. Is Identity running?");
       }
     } finally {
       setPending(false);
