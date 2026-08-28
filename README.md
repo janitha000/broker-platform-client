@@ -1,32 +1,28 @@
-# React + TypeScript + Vite
+# Broker platform UI
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Vite + React. Local APIs: copy [`.env.example`](.env.example) to `.env`.
 
-Currently, two official plugins are available:
+## AWS
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Static files on **S3**, HTTPS via **CloudFront**. `/auth*` and `/cases*` go to the existing ALB (same origin, no CORS, no mixed content). Infra is Terraform in the **API** repo: `api/infra/frontend.tf`.
 
-## React Compiler
+From `api/infra` (existing AWS credentials):
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```powershell
+terraform apply
+terraform output ui_url
+terraform output ui_bucket_name
+terraform output ui_cloudfront_distribution_id
+terraform output github_client_actions_role_arn
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+GitHub repo **variables** (Settings → Secrets and variables → Actions → Variables):
+
+| Variable | Value |
+|---|---|
+| `AWS_ROLE_ARN` | `github_client_actions_role_arn` |
+| `AWS_REGION` | `ap-southeast-2` |
+| `S3_BUCKET` | `ui_bucket_name` |
+| `CLOUDFRONT_DISTRIBUTION_ID` | `ui_cloudfront_distribution_id` |
+
+Push to `master` (or `release`) runs [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml). Production build uses empty `VITE_*` URLs so the browser calls `/auth` and `/cases` on the CloudFront host.
