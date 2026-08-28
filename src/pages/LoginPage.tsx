@@ -1,9 +1,13 @@
 import { useState, type FormEvent } from "react";
-import { useAuth } from "../auth/AuthContext";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { ApiError } from "../api/http";
+import { useAuth } from "../auth/AuthContext";
+import { Alert } from "../components/Alert";
+import { Button } from "../components/Button";
+import { Form } from "../components/Form";
+import { Page } from "../components/Page";
+import { TextField } from "../components/TextField";
 
-// Screen for POST /auth/login. One page file ≈ one URL.
 export function LoginPage() {
   const { user, signIn } = useAuth();
   const navigate = useNavigate();
@@ -35,37 +39,32 @@ export function LoginPage() {
   }
 
   return (
-    <main>
-      <h1>Sign in</h1>
-      <form onSubmit={onSubmit}>
-        <label>
-          Email
-          <input
-            type="email"
-            autoComplete="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </label>
-        <label>
-          Password
-          <input
-            type="password"
-            autoComplete="current-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </label>
-        {error ? <p role="alert">{error}</p> : null}
-        <button type="submit" disabled={pending}>
+    <Page title="Sign in">
+      <Form onSubmit={onSubmit}>
+        <TextField
+          label="Email"
+          type="email"
+          autoComplete="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+        <TextField
+          label="Password"
+          type="password"
+          autoComplete="current-password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+        {error ? <Alert>{error}</Alert> : null}
+        <Button type="submit" disabled={pending}>
           {pending ? "Signing in…" : "Sign in"}
-        </button>
-      </form>
+        </Button>
+      </Form>
       <p>
         New brokerage? <Link to="/register">Register</Link>
       </p>
-    </main>
+    </Page>
   );
 }

@@ -1,0 +1,11 @@
+p {
+  margin: var(--space-4) 0 0;
+}
+
+a {
+  color: var(--color-accent);
+}
+
+a:hover {
+  color: var(--color-accent-hover);
+}
