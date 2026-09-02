@@ -4,6 +4,7 @@ import {
   createCase,
   getCase,
   listCases,
+  type CaseDetail,
   type CaseList,
   type CaseListItem,
 } from "../api/origination";
@@ -69,7 +70,39 @@ export function useCompleteFactFindMutation(caseId: string) {
   return useMutation({
     mutationFn: (factFind: FactFindPayload) =>
       completeFactFind(caseId, factFind),
-    onSuccess: () => {
+    onSuccess: (result, payload) => {
+      queryClient.setQueryData<CaseDetail>(
+        caseKeys.detail(caseId),
+        (current) => {
+          if (!current) {
+            return current;
+          }
+
+          return {
+            ...current,
+            caseId: result.caseId,
+            status: result.status,
+            factFind: {
+              ...payload,
+              completedAt: new Date().toISOString(),
+            },
+          };
+        },
+      );
+
+      queryClient.setQueryData<CaseList>(caseKeys.list(), (current) => {
+        if (!current) {
+          return current;
+        }
+        return {
+          cases: current.cases.map((row) =>
+            row.caseId === result.caseId
+              ? { ...row, status: result.status }
+              : row,
+          ),
+        };
+      });
+
       void queryClient.invalidateQueries({ queryKey: caseKeys.detail(caseId) });
       void queryClient.invalidateQueries({ queryKey: caseKeys.list() });
     },
