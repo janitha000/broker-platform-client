@@ -1,17 +1,16 @@
 import { useState, type FormEvent } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
-import { ApiError } from "../api/http";
-import { useAuth } from "../auth/AuthContext";
-import { Alert } from "../components/Alert";
-import { Button } from "../components/Button";
-import { Form } from "../components/Form";
-import { Page } from "../components/Page";
-import { TextField } from "../components/TextField";
+import { ApiError } from "../../api/http";
+import { useAuth } from "../../auth/AuthContext";
+import { Alert } from "../../components/Alert";
+import { Button } from "../../components/Button";
+import { Form } from "../../components/Form";
+import styles from "../../layouts/public/guestScreen.module.css";
+import { TextField } from "../../components/TextField";
 
-export function RegisterPage() {
-  const { user, ready, register } = useAuth();
+export function LoginPage() {
+  const { user, ready, signIn } = useAuth();
   const navigate = useNavigate();
-  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -30,13 +29,13 @@ export function RegisterPage() {
     setError(null);
     setPending(true);
     try {
-      await register(name, email, password);
+      await signIn(email, password);
       navigate("/", { replace: true });
     } catch (caught) {
-      if (caught instanceof ApiError && caught.status === 409) {
-        setError("That email is already registered.");
+      if (caught instanceof ApiError && caught.status === 401) {
+        setError("Email or password is wrong.");
       } else {
-        setError("Could not register. Is Identity running?");
+        setError("Could not sign in. Is Identity running?");
       }
     } finally {
       setPending(false);
@@ -44,16 +43,9 @@ export function RegisterPage() {
   }
 
   return (
-    <Page title="Register brokerage">
+    <>
+      <h1 className={styles.title}>Sign in</h1>
       <Form onSubmit={onSubmit}>
-        <TextField
-          label="Brokerage name"
-          type="text"
-          autoComplete="organization"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-        />
         <TextField
           label="Email"
           type="email"
@@ -65,19 +57,19 @@ export function RegisterPage() {
         <TextField
           label="Password"
           type="password"
-          autoComplete="new-password"
+          autoComplete="current-password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
         />
         {error ? <Alert>{error}</Alert> : null}
         <Button type="submit" disabled={pending}>
-          {pending ? "Registering…" : "Register"}
+          {pending ? "Signing in…" : "Sign in"}
         </Button>
       </Form>
       <p>
-        Already have an account? <Link to="/login">Sign in</Link>
+        New brokerage? <Link to="/register">Register</Link>
       </p>
-    </Page>
+    </>
   );
 }
