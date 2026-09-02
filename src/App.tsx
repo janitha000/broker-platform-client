@@ -5,6 +5,7 @@ import { HomePage } from "./pages/HomePage";
 import { LoginPage } from "./pages/public/LoginPage";
 import { RegisterPage } from "./pages/public/RegisterPage";
 import { GuestLayout } from "./layouts/public/GuestLayout";
+import { AppShell } from "./layouts/app/AppShell";
 
 function AppRoutes() {
   return (
@@ -13,22 +14,18 @@ function AppRoutes() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
       </Route>
+
       <Route
-        path="/"
         element={
           <ProtectedRoute>
-            <HomePage />
+            <AppShell />
           </ProtectedRoute>
         }
-      />
-      <Route
-        path="/cases/:caseId"
-        element={
-          <ProtectedRoute>
-            <CasePage />
-          </ProtectedRoute>
-        }
-      />
+      >
+        <Route index element={<HomePage />} />
+        <Route path="cases/:caseId" element={<CasePage />} />
+      </Route>
+
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

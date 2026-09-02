@@ -4,9 +4,9 @@ import { ApiError } from "../api/http";
 import { Alert } from "../components/Alert";
 import { Button } from "../components/Button";
 import { Form } from "../components/Form";
-import { Page } from "../components/Page";
 import { TextField } from "../components/TextField";
 import { useCaseQuery, useCompleteFactFindMutation } from "../hooks/useCases";
+import screen from "../layouts/app/appScreen.module.css";
 import styles from "./CasePage.module.css";
 import { ListSkeleton } from "../components/ListSkeleton";
 import { QueryError } from "../components/QueryError";
@@ -46,7 +46,8 @@ export function CasePage() {
   }
 
   return (
-    <Page title="Case">
+    <>
+      <h1 className={screen.title}>Case</h1>
       {caseQuery.isPending ? (
         <ListSkeleton rows={3} />
       ) : loadError ? (
@@ -132,6 +133,6 @@ export function CasePage() {
       <Link className={styles.back} to="/">
         All cases
       </Link>
-    </Page>
+    </>
   );
 }

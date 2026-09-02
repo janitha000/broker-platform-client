@@ -1,19 +1,17 @@
 import { Link, useNavigate } from "react-router-dom";
 import { ApiError } from "../api/http";
-import { useAuth } from "../auth/AuthContext";
 import { Alert } from "../components/Alert";
 import { Button } from "../components/Button";
-import { Form } from "../components/Form";
-import { Page } from "../components/Page";
-import { TextField } from "../components/TextField";
-import { useCaseListQuery, useCreateCaseMutation } from "../hooks/useCases";
-import styles from "./HomePage.module.css";
 import { EmptyState } from "../components/EmptyState";
+import { Form } from "../components/Form";
 import { ListSkeleton } from "../components/ListSkeleton";
 import { QueryError } from "../components/QueryError";
+import { TextField } from "../components/TextField";
+import { useCaseListQuery, useCreateCaseMutation } from "../hooks/useCases";
+import screen from "../layouts/app/appScreen.module.css";
+import styles from "./HomePage.module.css";
 
 export function HomePage() {
-  const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const casesQuery = useCaseListQuery();
   const createCaseMutation = useCreateCaseMutation();
@@ -34,8 +32,13 @@ export function HomePage() {
       : null;
 
   return (
-    <Page title="Broker">
-      <p>Signed in as {user?.email}</p>
+    <>
+      <h1 className={screen.title}>
+        Cases
+        {casesQuery.isFetching && !casesQuery.isPending ? (
+          <span className={styles.updating}> Updating…</span>
+        ) : null}
+      </h1>
 
       <Form
         onSubmit={(event) => {
@@ -56,41 +59,33 @@ export function HomePage() {
 
       {createError ? <Alert>{createError}</Alert> : null}
 
-      <h2 className={styles.heading}>
-        Cases
-        {casesQuery.isFetching && !casesQuery.isPending ? (
-          <span className={styles.updating}> Updating…</span>
-        ) : null}
-      </h2>
-      {casesQuery.isPending ? (
-        <ListSkeleton rows={5} />
-      ) : listError ? (
-        <QueryError
-          message={listError}
-          onRetry={() => {
-            void casesQuery.refetch();
-          }}
-        />
-      ) : cases.length === 0 ? (
-        <EmptyState title="No cases for this brokerage yet.">
-          Create a new case to get started.
-        </EmptyState>
-      ) : (
-        <ul className={styles.list}>
-          {cases.map((item) => (
-            <li key={item.caseId}>
-              <Link className={styles.item} to={`/cases/${item.caseId}`}>
-                <span className={styles.status}>{item.status}</span>
-                <span>{item.inquiryNotes.trim() || "No notes"}</span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      )}
-
-      <Button variant="secondary" onClick={() => void signOut()}>
-        Sign out
-      </Button>
-    </Page>
+      <div className={styles.results}>
+        {casesQuery.isPending ? (
+          <ListSkeleton rows={5} />
+        ) : listError ? (
+          <QueryError
+            message={listError}
+            onRetry={() => {
+              void casesQuery.refetch();
+            }}
+          />
+        ) : cases.length === 0 ? (
+          <EmptyState title="No cases for this brokerage yet.">
+            Create a new case to get started.
+          </EmptyState>
+        ) : (
+          <ul className={styles.list}>
+            {cases.map((item) => (
+              <li key={item.caseId}>
+                <Link className={styles.item} to={`/cases/${item.caseId}`}>
+                  <span className={styles.status}>{item.status}</span>
+                  <span>{item.inquiryNotes.trim() || "No notes"}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </>
   );
 }
