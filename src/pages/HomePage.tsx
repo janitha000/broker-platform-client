@@ -1,4 +1,3 @@
-import { Link, useNavigate } from "react-router-dom";
 import { ApiError } from "../api/http";
 import { Alert } from "../components/Alert";
 import { Button } from "../components/Button";
@@ -10,13 +9,46 @@ import { TextField } from "../components/TextField";
 import { useCaseListQuery, useCreateCaseMutation } from "../hooks/useCases";
 import screen from "../layouts/app/appScreen.module.css";
 import styles from "./HomePage.module.css";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { parseCaseStatusParam, type CaseStatus } from "../api/origination";
+
+const STATUS_FILTERS: { label: string; status?: CaseStatus }[] = [
+  { label: "All" },
+  { label: "Inquiry", status: "Inquiry" },
+  { label: "Fact-find completed", status: "FactFindCompleted" },
+];
+
+function emptyListCopy(status?: CaseStatus): { title: string; body: string } {
+  if (status === "Inquiry") {
+    return {
+      title: "No inquiry cases.",
+      body: "Create a new case, or choose All.",
+    };
+  }
+  if (status === "FactFindCompleted") {
+    return {
+      title: "No fact-find completed cases.",
+      body: "Complete a fact-find, or choose All.",
+    };
+  }
+  return {
+    title: "No cases for this brokerage yet.",
+    body: "Create a new case to get started.",
+  };
+}
 
 export function HomePage() {
   const navigate = useNavigate();
   const casesQuery = useCaseListQuery();
   const createCaseMutation = useCreateCaseMutation();
 
-  const cases = casesQuery.data ?? [];
+  const [searchParams, setSearchParams] = useSearchParams();
+  const statusFilter = parseCaseStatusParam(searchParams.get("status"));
+
+  const cases = statusFilter
+    ? (casesQuery.data ?? []).filter((item) => item.status === statusFilter)
+    : (casesQuery.data ?? []);
+
   const listError =
     casesQuery.isError &&
     !(casesQuery.error instanceof ApiError && casesQuery.error.status === 401)
@@ -30,6 +62,23 @@ export function HomePage() {
     )
       ? "Could not create a case. Is Origination reachable?"
       : null;
+
+  function setStatusFilter(next?: CaseStatus) {
+    setSearchParams(
+      (current) => {
+        const params = new URLSearchParams(current);
+        if (next) {
+          params.set("status", next);
+        } else {
+          params.delete("status");
+        }
+        return params;
+      },
+      { replace: true },
+    );
+  }
+
+  const empty = emptyListCopy(statusFilter);
 
   return (
     <>
@@ -59,6 +108,23 @@ export function HomePage() {
 
       {createError ? <Alert>{createError}</Alert> : null}
 
+      <nav className={styles.filters} aria-label="Filter cases">
+        {STATUS_FILTERS.map((item) => {
+          const isCurrent = item.status === statusFilter;
+          return (
+            <button
+              key={item.label}
+              type="button"
+              className={isCurrent ? styles.filterCurrent : styles.filter}
+              aria-current={isCurrent ? "true" : undefined}
+              onClick={() => setStatusFilter(item.status)}
+            >
+              {item.label}
+            </button>
+          );
+        })}
+      </nav>
+
       <div className={styles.results}>
         {casesQuery.isPending ? (
           <ListSkeleton rows={5} />
@@ -70,9 +136,7 @@ export function HomePage() {
             }}
           />
         ) : cases.length === 0 ? (
-          <EmptyState title="No cases for this brokerage yet.">
-            Create a new case to get started.
-          </EmptyState>
+          <EmptyState title={empty.title}>{empty.body}</EmptyState>
         ) : (
           <ul className={styles.list}>
             {cases.map((item) => (

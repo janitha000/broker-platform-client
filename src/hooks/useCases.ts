@@ -1,5 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { completeFactFind, createCase, getCase, listCases } from "../api/origination";
+import {
+  completeFactFind,
+  createCase,
+  getCase,
+  listCases,
+  type CaseList,
+  type CaseListItem,
+} from "../api/origination";
 import { caseKeys } from "../api/queryKeys";
 import { useAuth } from "../auth/AuthContext";
 
@@ -29,7 +36,27 @@ export function useCreateCaseMutation() {
 
   return useMutation({
     mutationFn: (inquiryNotes: string) => createCase(inquiryNotes),
-    onSuccess: () => {
+    onSuccess: (created, inquiryNotes) => {
+      const item: CaseListItem = {
+        caseId: created.caseId,
+        status: created.status,
+        inquiryNotes,
+      };
+      queryClient.setQueryData<CaseList>(caseKeys.list(), (current) => {
+        if (!current) {
+          return { cases: [item] };
+        }
+        return {
+          cases: [
+            item,
+            ...current.cases.filter((row) => row.caseId !== item.caseId),
+          ],
+        };
+      });
+      queryClient.setQueryData(caseKeys.detail(created.caseId), {
+        ...item,
+        factFind: null,
+      });
       void queryClient.invalidateQueries({ queryKey: caseKeys.list() });
     },
   });

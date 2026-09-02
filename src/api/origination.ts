@@ -75,3 +75,12 @@ export function completeFactFind(
     body: factFind,
   });
 }
+
+export function parseCaseStatusParam(
+  value: string | null,
+): CaseStatus | undefined {
+  if (value === "Inquiry" || value === "FactFindCompleted") {
+    return value;
+  }
+  return undefined;
+}
