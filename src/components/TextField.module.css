@@ -22,3 +22,13 @@
   outline-offset: 2px;
   border-color: var(--color-focus);
 }
+
+.inputError {
+  border-color: var(--color-danger);
+}
+
+.error {
+  margin: 0;
+  font-weight: var(--font-weight-normal);
+  color: var(--color-danger);
+}

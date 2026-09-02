@@ -8,6 +8,7 @@
  * Cookie auth: the browser sends broker.access; do not pass a JWT.
  */
 
+import type { FactFindPayload } from "./factFindSchema";
 import { request } from "./http";
 
 const originationUrl = import.meta.env.VITE_ORIGINATION_API_URL ?? "";
@@ -62,13 +63,7 @@ export function getCase(caseId: string): Promise<CaseDetail> {
 
 export function completeFactFind(
   caseId: string,
-  factFind: {
-    objectives: string;
-    income: number;
-    expenses: number;
-    assets: number;
-    debts: number;
-  },
+  factFind: FactFindPayload,
 ): Promise<CaseSummary> {
   return request<CaseSummary>(originationUrl, `/cases/${caseId}/fact-find`, {
     method: "PUT",

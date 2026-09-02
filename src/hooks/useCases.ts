@@ -9,6 +9,7 @@ import {
 } from "../api/origination";
 import { caseKeys } from "../api/queryKeys";
 import { useAuth } from "../auth/AuthContext";
+import type { FactFindPayload } from "../api/factFindSchema";
 
 export function useCaseListQuery() {
   const { user } = useAuth();
@@ -66,13 +67,8 @@ export function useCompleteFactFindMutation(caseId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (factFind: {
-      objectives: string;
-      income: number;
-      expenses: number;
-      assets: number;
-      debts: number;
-    }) => completeFactFind(caseId, factFind),
+    mutationFn: (factFind: FactFindPayload) =>
+      completeFactFind(caseId, factFind),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: caseKeys.detail(caseId) });
       void queryClient.invalidateQueries({ queryKey: caseKeys.list() });

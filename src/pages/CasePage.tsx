@@ -1,4 +1,4 @@
-import { type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ApiError } from "../api/http";
 import { Alert } from "../components/Alert";
@@ -10,11 +10,20 @@ import screen from "../layouts/app/appScreen.module.css";
 import styles from "./CasePage.module.css";
 import { ListSkeleton } from "../components/ListSkeleton";
 import { QueryError } from "../components/QueryError";
+import {
+  fieldErrorsFromZod,
+  parseFactFindForm,
+  type FactFindPayload,
+} from "../api/factFindSchema";
 
 export function CasePage() {
   const { caseId } = useParams();
   const caseQuery = useCaseQuery(caseId);
   const factFindMutation = useCompleteFactFindMutation(caseId ?? "");
+
+  const [fieldErrors, setFieldErrors] = useState<
+    Partial<Record<keyof FactFindPayload, string>>
+  >({});
 
   const caseItem = caseQuery.data;
   const queryError = caseQuery.error;
@@ -35,14 +44,13 @@ export function CasePage() {
   function onCompleteFactFind(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!caseId) return;
-    const data = new FormData(event.currentTarget);
-    factFindMutation.mutate({
-      objectives: String(data.get("objectives") ?? ""),
-      income: Number(data.get("income")),
-      expenses: Number(data.get("expenses")),
-      assets: Number(data.get("assets")),
-      debts: Number(data.get("debts")),
-    });
+    const parsed = parseFactFindForm(new FormData(event.currentTarget));
+    if (!parsed.success) {
+      setFieldErrors(fieldErrorsFromZod(parsed.error));
+      return;
+    }
+    setFieldErrors({});
+    factFindMutation.mutate(parsed.data);
   }
 
   return (
@@ -72,38 +80,38 @@ export function CasePage() {
 
           {caseItem.status === "Inquiry" ? (
             <Form onSubmit={onCompleteFactFind}>
-              <TextField label="Objectives" name="objectives" required />
+              <TextField
+                label="Objectives"
+                name="objectives"
+                error={fieldErrors.objectives}
+              />
               <TextField
                 label="Income"
                 name="income"
-                type="number"
-                min={0}
-                step="0.01"
-                required
+                inputMode="decimal"
+                autoComplete="off"
+                error={fieldErrors.income}
               />
               <TextField
                 label="Expenses"
                 name="expenses"
-                type="number"
-                min={0}
-                step="0.01"
-                required
+                inputMode="decimal"
+                autoComplete="off"
+                error={fieldErrors.expenses}
               />
               <TextField
                 label="Assets"
                 name="assets"
-                type="number"
-                min={0}
-                step="0.01"
-                required
+                inputMode="decimal"
+                autoComplete="off"
+                error={fieldErrors.assets}
               />
               <TextField
                 label="Debts"
                 name="debts"
-                type="number"
-                min={0}
-                step="0.01"
-                required
+                inputMode="decimal"
+                autoComplete="off"
+                error={fieldErrors.debts}
               />
               <Button type="submit" disabled={factFindMutation.isPending}>
                 {factFindMutation.isPending ? "Saving…" : "Complete fact-find"}
