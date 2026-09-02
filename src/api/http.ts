@@ -1,10 +1,20 @@
 export class ApiError extends Error {
   readonly status: number;
-
-  constructor(status: number, message: string) {
+  readonly title: string | undefined;
+  readonly fieldErrors: Readonly<Record<string, string>>;
+  constructor(
+    status: number,
+    message: string,
+    options: {
+      title?: string;
+      fieldErrors?: Record<string, string>;
+    } = {},
+  ) {
     super(message);
     this.name = "ApiError";
     this.status = status;
+    this.title = options.title;
+    this.fieldErrors = options.fieldErrors ?? {};
   }
 }
 
@@ -48,7 +58,11 @@ export async function request<T>(
   }
 
   if (!response.ok) {
-    throw new ApiError(response.status, response.statusText);
+    const problem = await readProblemDetails(response);
+    throw new ApiError(response.status, response.statusText, {
+      title: problem.title,
+      fieldErrors: problem.fieldErrors,
+    });
   }
 
   if (response.status === 204) {
@@ -56,4 +70,42 @@ export async function request<T>(
   }
 
   return (await response.json()) as T;
+}
+
+async function readProblemDetails(response: Response): Promise<{
+  title?: string;
+  fieldErrors: Record<string, string>;
+}> {
+  const text = await response.text();
+  if (!text) {
+    return { fieldErrors: {} };
+  }
+  let body: unknown;
+  try {
+    body = JSON.parse(text);
+  } catch {
+    return { fieldErrors: {} };
+  }
+  if (!body || typeof body !== "object") {
+    return { fieldErrors: {} };
+  }
+  const record = body as Record<string, unknown>;
+  const title = typeof record.title === "string" ? record.title : undefined;
+  const fieldErrors = flattenProblemErrors(record.errors);
+  return { title, fieldErrors };
+}
+
+function flattenProblemErrors(errors: unknown): Record<string, string> {
+  if (!errors || typeof errors !== "object" || Array.isArray(errors)) {
+    return {};
+  }
+
+  const result: Record<string, string> = {};
+  for (const [key, value] of Object.entries(errors as Record<string, unknown>)) {
+    if (!Array.isArray(value) || typeof value[0] !== "string" || value[0].length === 0) {
+      continue;
+    }
+    result[key] = value[0];
+  }
+  return result;
 }

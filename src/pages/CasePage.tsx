@@ -15,6 +15,9 @@ import {
   parseFactFindForm,
   type FactFindPayload,
 } from "../api/factFindSchema";
+import { fieldErrorsFromProblem } from "../api/problemDetails";
+import { formatDateTime } from "../helpers/date";
+import { formatMoney } from "../helpers/money";
 
 export function CasePage() {
   const { caseId } = useParams();
@@ -28,6 +31,11 @@ export function CasePage() {
   const caseItem = caseQuery.data;
   const queryError = caseQuery.error;
   const mutationError = factFindMutation.error;
+  const apiFieldErrors =
+    mutationError instanceof ApiError
+      ? fieldErrorsFromProblem(mutationError.fieldErrors)
+      : {};
+  const hasApiFieldErrors = Object.keys(apiFieldErrors).length > 0;
   const loadError =
     queryError instanceof ApiError && queryError.status === 404
       ? "This case was not found for your brokerage."
@@ -37,20 +45,33 @@ export function CasePage() {
         : null;
   const saveError =
     factFindMutation.isError &&
-    !(mutationError instanceof ApiError && mutationError.status === 401)
-      ? "Could not save the fact-find."
+    !(mutationError instanceof ApiError && mutationError.status === 401) &&
+    !hasApiFieldErrors
+      ? mutationError instanceof ApiError && mutationError.title
+        ? mutationError.title
+        : "Could not save the fact-find."
       : null;
 
   function onCompleteFactFind(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!caseId) return;
+
+    factFindMutation.reset();
     const parsed = parseFactFindForm(new FormData(event.currentTarget));
     if (!parsed.success) {
       setFieldErrors(fieldErrorsFromZod(parsed.error));
       return;
     }
+
     setFieldErrors({});
-    factFindMutation.mutate(parsed.data);
+    factFindMutation.mutate(parsed.data, {
+      onError: (error) => {
+        if (!(error instanceof ApiError) || error.status !== 400) {
+          return;
+        }
+        setFieldErrors(fieldErrorsFromProblem(error.fieldErrors));
+      },
+    });
   }
 
   return (
@@ -122,17 +143,15 @@ export function CasePage() {
               <dt>Objectives</dt>
               <dd>{caseItem.factFind.objectives}</dd>
               <dt>Income</dt>
-              <dd>{caseItem.factFind.income}</dd>
+              <dd>{formatMoney(caseItem.factFind.income)}</dd>
               <dt>Expenses</dt>
-              <dd>{caseItem.factFind.expenses}</dd>
+              <dd>{formatMoney(caseItem.factFind.expenses)}</dd>
               <dt>Assets</dt>
-              <dd>{caseItem.factFind.assets}</dd>
+              <dd>{formatMoney(caseItem.factFind.assets)}</dd>
               <dt>Debts</dt>
-              <dd>{caseItem.factFind.debts}</dd>
+              <dd>{formatMoney(caseItem.factFind.debts)}</dd>
               <dt>Completed</dt>
-              <dd>
-                {new Date(caseItem.factFind.completedAt).toLocaleString()}
-              </dd>
+              <dd>{formatDateTime(caseItem.factFind.completedAt)}</dd>
             </dl>
           ) : null}
         </>
