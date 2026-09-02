@@ -130,7 +130,7 @@ export function CasePage() {
         </>
       ) : null}
 
-      <Link className={styles.back} to="/">
+      <Link className={styles.back} to="/cases">
         All cases
       </Link>
     </>

@@ -6,6 +6,7 @@ import { LoginPage } from "./pages/public/LoginPage";
 import { RegisterPage } from "./pages/public/RegisterPage";
 import { GuestLayout } from "./layouts/public/GuestLayout";
 import { AppShell } from "./layouts/app/AppShell";
+import { CasesLayout } from "./layouts/app/CasesLayout";
 
 function AppRoutes() {
   return (
@@ -22,11 +23,14 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       >
-        <Route index element={<HomePage />} />
-        <Route path="cases/:caseId" element={<CasePage />} />
+        <Route index element={<Navigate to="/cases" replace />} />
+        <Route path="cases" element={<CasesLayout />}>
+          <Route index element={<HomePage />} />
+          <Route path=":caseId" element={<CasePage />} />
+        </Route>
       </Route>
 
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="*" element={<Navigate to="/cases" replace />} />
     </Routes>
   );
 }

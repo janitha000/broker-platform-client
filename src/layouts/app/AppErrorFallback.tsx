@@ -15,7 +15,7 @@ export function AppErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
         Try again
       </Button>
       <p>
-        <Link to="/">All cases</Link>
+        <Link to="/cases">All cases</Link>
       </p>
     </>
   );

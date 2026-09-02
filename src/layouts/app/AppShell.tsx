@@ -10,14 +10,11 @@ export function AppShell() {
   const location = useLocation();
   const { user, signOut } = useAuth();
 
-  const casesActive =
-    location.pathname === "/" || location.pathname.startsWith("/cases/");
-
   return (
     <div className={styles.frame}>
       <header className={styles.header}>
         <p className={styles.brand}>
-          <NavLink to="/">Broker</NavLink>
+          <NavLink to="/cases">Broker</NavLink>
         </p>
         <div className={styles.tools}>
           <p className={styles.email}>{user?.email}</p>
@@ -29,10 +26,8 @@ export function AppShell() {
       </header>
       <nav className={styles.nav} aria-label="Main">
         <NavLink
-          to="/"
-          end
-          className={casesActive ? styles.current : undefined}
-          aria-current={casesActive ? "page" : undefined}
+          to="/cases"
+          className={({ isActive }) => (isActive ? styles.current : undefined)}
         >
           Cases
         </NavLink>
