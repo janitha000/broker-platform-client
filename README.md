@@ -2,6 +2,8 @@
 
 Vite + React. Local APIs: copy [`.env.example`](.env.example) to `.env`.
 
+Sign in / out are full browser navigations to `/auth/login` and `/auth/logout` (Auth0 via Identity). Session is `GET /auth/me` plus the `broker.access` cookie — no Auth0 SDK. Auth design and flow diagrams: [AUTH.md](../AUTH.md).
+
 ## AWS
 
 Static files on **S3**, HTTPS via **CloudFront**. `/auth*` and `/cases*` go to the existing ALB (same origin, no CORS, no mixed content). Infra is Terraform in the **API** repo: `api/infra/frontend.tf`.
