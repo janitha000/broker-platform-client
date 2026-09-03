@@ -19,7 +19,7 @@ export function AppShell() {
         <div className={styles.tools}>
           <p className={styles.email}>{user?.email}</p>
           <ThemeToggle />
-          <Button variant="secondary" onClick={() => void signOut()}>
+          <Button variant="secondary" onClick={() => signOut()}>
             Sign out
           </Button>
         </div>
