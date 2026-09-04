@@ -34,7 +34,6 @@ export const register = createAsyncThunk(
 export const signOut = createAsyncThunk(
   "auth/signOut",
   async (_, { dispatch }) => {
-    queryClient.clear();
     dispatch(sessionCleared());
     beginLogout();
   },
@@ -43,7 +42,6 @@ export const signOut = createAsyncThunk(
 export const sessionUnauthorized = createAsyncThunk(
   "auth/sessionUnauthorized",
   async (_, { dispatch }) => {
-    queryClient.clear();
     dispatch(sessionCleared());
   },
 );
