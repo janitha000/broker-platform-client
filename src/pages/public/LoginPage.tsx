@@ -1,6 +1,6 @@
 import { Link, Navigate } from "react-router-dom";
 import { beginLogin } from "../../api/identity";
-import { useAuth } from "../../auth/AuthContext";
+import { useAuth } from "../../auth/useAuth";
 import { Button } from "../../components/Button";
 import styles from "../../layouts/public/guestScreen.module.css";
 

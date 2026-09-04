@@ -9,7 +9,7 @@ import {
   type CaseListItem,
 } from "../api/origination";
 import { caseKeys } from "../api/queryKeys";
-import { useAuth } from "../auth/AuthContext";
+import { useAuth } from "../auth/useAuth";
 import type { FactFindPayload } from "../api/factFindSchema";
 
 export function useCaseListQuery() {

@@ -1,5 +1,5 @@
 import { NavLink, Outlet, useLocation } from "react-router-dom";
-import { useAuth } from "../../auth/AuthContext";
+import { useAuth } from "../../auth/useAuth";
 import styles from "./AppShell.module.css";
 import { ThemeToggle } from "../../components/ThemeToggle";
 import { Button } from "../../components/Button";
@@ -19,7 +19,7 @@ export function AppShell() {
         <div className={styles.tools}>
           <p className={styles.email}>{user?.email}</p>
           <ThemeToggle />
-          <Button variant="secondary" onClick={() => signOut()}>
+          <Button variant="secondary" onClick={() => void signOut()}>
             Sign out
           </Button>
         </div>

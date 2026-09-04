@@ -1,3 +1,7 @@
+/**
+ * Learning reference: previous session model (Context + useState).
+ * Not mounted. Live auth is Redux: store, authSlice, AuthBootstrap, useAuth.ts.
+ */
 import {
   createContext,
   useContext,

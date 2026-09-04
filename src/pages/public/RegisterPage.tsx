@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { ApiError } from "../../api/http";
-import { useAuth } from "../../auth/AuthContext";
+import { useAuth } from "../../auth/useAuth";
 import { Alert } from "../../components/Alert";
 import { Button } from "../../components/Button";
 import { Form } from "../../components/Form";
@@ -30,7 +30,7 @@ export function RegisterPage() {
     setError(null);
     setPending(true);
     try {
-      await register(name, email, password);
+      await register({ name, email, password });
       navigate("/", { replace: true });
     } catch (caught) {
       if (caught instanceof ApiError && caught.status === 409) {
