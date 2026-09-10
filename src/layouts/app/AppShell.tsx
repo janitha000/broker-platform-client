@@ -29,9 +29,16 @@ export function AppShell() {
       <nav className={styles.nav} aria-label="Main">
         <NavLink
           to="/cases"
+          end
           className={({ isActive }) => (isActive ? styles.current : undefined)}
         >
           Cases
+        </NavLink>
+        <NavLink
+          to="/cases/board"
+          className={({ isActive }) => (isActive ? styles.current : undefined)}
+        >
+          Board
         </NavLink>
       </nav>
       <main>

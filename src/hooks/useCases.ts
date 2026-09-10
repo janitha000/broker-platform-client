@@ -11,6 +11,7 @@ import {
 import { caseKeys } from "../api/queryKeys";
 import { useAuth } from "../auth/useAuth";
 import type { FactFindPayload } from "../api/factFindSchema";
+import { groupCasesByStatus } from "../cases/groupCases";
 
 export function useCaseListQuery() {
   const { user } = useAuth();
@@ -107,4 +108,10 @@ export function useCompleteFactFindMutation(caseId: string) {
       void queryClient.invalidateQueries({ queryKey: caseKeys.list() });
     },
   });
+}
+
+export function useCaseBoardQuery() {
+  const query = useCaseListQuery();
+  const columns = groupCasesByStatus(query.data ?? []);
+  return { query, columns };
 }

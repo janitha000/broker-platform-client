@@ -1,0 +1,8 @@
+.board {
+  display: flex;
+  gap: var(--space-4);
+  overflow-x: auto;
+  min-height: 20rem;
+  margin: 0;
+  padding: 0;
+}

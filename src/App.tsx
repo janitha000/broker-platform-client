@@ -7,6 +7,7 @@ import { RegisterPage } from "./pages/public/RegisterPage";
 import { GuestLayout } from "./layouts/public/GuestLayout";
 import { AppShell } from "./layouts/app/AppShell";
 import { CasesLayout } from "./layouts/app/CasesLayout";
+import { BoardPage } from "./cases/BoardPage";
 
 function AppRoutes() {
   return (
@@ -26,6 +27,7 @@ function AppRoutes() {
         <Route index element={<Navigate to="/cases" replace />} />
         <Route path="cases" element={<CasesLayout />}>
           <Route index element={<HomePage />} />
+          <Route path="board" element={<BoardPage />} />
           <Route path=":caseId" element={<CasePage />} />
         </Route>
       </Route>
