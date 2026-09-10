@@ -11,29 +11,30 @@ import screen from "../layouts/app/appScreen.module.css";
 import styles from "./HomePage.module.css";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { parseCaseStatusParam, type CaseStatus } from "../api/origination";
+import { PIPELINE_COLUMNS } from "../cases/pipeline";
 
 const STATUS_FILTERS: { label: string; status?: CaseStatus }[] = [
   { label: "All" },
-  { label: "Inquiry", status: "Inquiry" },
-  { label: "Fact-find completed", status: "FactFindCompleted" },
+  ...PIPELINE_COLUMNS.map((column) => ({
+    label: column.label,
+    status: column.status,
+  })),
 ];
 
 function emptyListCopy(status?: CaseStatus): { title: string; body: string } {
-  if (status === "Inquiry") {
+  if (!status) {
     return {
-      title: "No inquiry cases.",
-      body: "Create a new case, or choose All.",
+      title: "No cases for this brokerage yet.",
+      body: "Create a new case to get started.",
     };
   }
-  if (status === "FactFindCompleted") {
-    return {
-      title: "No fact-find completed cases.",
-      body: "Complete a fact-find, or choose All.",
-    };
-  }
+
+  const column = PIPELINE_COLUMNS.find((item) => item.status === status);
   return {
-    title: "No cases for this brokerage yet.",
-    body: "Create a new case to get started.",
+    title: column?.emptyTitle ?? "No cases.",
+    body: column
+      ? `${column.emptyBody} Or choose All.`
+      : "Create a new case, or choose All.",
   };
 }
 
@@ -100,7 +101,7 @@ export function HomePage() {
           });
         }}
       >
-        <TextField label="New inquiry" name="inquiryNotes" />
+        <TextField label="New enquiry" name="inquiryNotes" />
         <Button type="submit" disabled={createCaseMutation.isPending}>
           {createCaseMutation.isPending ? "Creating…" : "Create case"}
         </Button>

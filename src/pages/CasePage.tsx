@@ -95,11 +95,11 @@ export function CasePage() {
             ) : null}
           </span>
           <p className={styles.notes}>
-            {caseItem.inquiryNotes.trim() || "No inquiry notes."}
+            {caseItem.inquiryNotes.trim() || "No enquiry notes."}
           </p>
           {saveError ? <Alert>{saveError}</Alert> : null}
 
-          {caseItem.status === "Inquiry" ? (
+          {caseItem.status === "Enquiry" ? (
             <Form onSubmit={onCompleteFactFind}>
               <TextField
                 label="Objectives"

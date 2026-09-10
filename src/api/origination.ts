@@ -13,7 +13,18 @@ import { request } from "./http";
 
 const originationUrl = import.meta.env.VITE_ORIGINATION_API_URL ?? "";
 
-export type CaseStatus = "Inquiry" | "FactFindCompleted";
+export const CASE_STATUSES = [
+  "Enquiry",
+  "FactFindCompleted",
+  "Recommendation",
+  "Lodged",
+  "ConditionalApproval",
+  "FormalApproval",
+  "Settled",
+  "NotProceeded",
+] as const;
+
+export type CaseStatus = (typeof CASE_STATUSES)[number];
 
 export type FactFind = {
   objectives: string;
@@ -74,8 +85,5 @@ export function completeFactFind(
 export function parseCaseStatusParam(
   value: string | null,
 ): CaseStatus | undefined {
-  if (value === "Inquiry" || value === "FactFindCompleted") {
-    return value;
-  }
-  return undefined;
+  return CASE_STATUSES.find((status) => status === value);
 }
