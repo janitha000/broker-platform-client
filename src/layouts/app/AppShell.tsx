@@ -5,10 +5,12 @@ import { ThemeToggle } from "../../components/ThemeToggle";
 import { Button } from "../../components/Button";
 import { ErrorBoundary } from "react-error-boundary";
 import { AppErrorFallback } from "./AppErrorFallback";
+import { useNotificationHub } from "../../realtime/useNotificationHub";
 
 export function AppShell() {
   const location = useLocation();
   const { user, signOut } = useAuth();
+  useNotificationHub();
 
   return (
     <div className={styles.frame}>
