@@ -4,6 +4,7 @@
  *   GET  /auth/login     — browser navigation (Auth0)
  *   GET  /auth/logout    — browser navigation (Auth0)
  *   GET  /auth/me
+ *   POST /auth/refresh   — BFF cookie rotation; also used by http.ts on 401
  */
 
 import { request } from "./http";
@@ -44,4 +45,8 @@ export function beginLogin(): void {
 /** Full navigation so Identity can 302 to Auth0 logout. Do not fetch. */
 export function beginLogout(): void {
   window.location.assign(identityPath("/auth/logout"));
+}
+
+export function refreshSession(): Promise<void> {
+  return request<void>(identityUrl, "/auth/refresh", { method: "POST" });
 }

@@ -6,6 +6,7 @@ import {
 import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "../auth/useAuth";
+import { tryRefresh } from "../api/http";
 import { caseKeys } from "../api/queryKeys";
 import { realtimeNotificationSchema } from "./notificationPayload";
 
@@ -38,9 +39,18 @@ export function useNotificationHub() {
       }
     });
 
-    void connection.start().catch((error: unknown) => {
-      console.error(error);
-    });
+    void connection
+      .start()
+      .catch(async (error: unknown) => {
+        if (await tryRefresh()) {
+          await connection.start();
+          return;
+        }
+        throw error;
+      })
+      .catch((error: unknown) => {
+        console.error(error);
+      });
 
     return () => {
       connection.off("notification");

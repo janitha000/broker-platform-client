@@ -1,3 +1,5 @@
+let refreshInFlight: Promise<boolean> | null = null;
+
 export class ApiError extends Error {
   readonly status: number;
   readonly title: string | undefined;
@@ -33,24 +35,53 @@ type RequestOptions = {
   body?: unknown;
 };
 
+function toInit(options: RequestOptions): RequestInit {
+  const headers = new Headers();
+  if (options.body !== undefined) {
+    headers.set("Content-Type", "application/json");
+  }
+  return {
+    method: options.method ?? "GET",
+    headers,
+    credentials: "include",
+    body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
+  };
+}
+
+/** One in-flight Auth0 refresh so rotation is not raced by parallel 401s. */
+export async function tryRefresh(): Promise<boolean> {
+  if (refreshInFlight) return refreshInFlight;
+  refreshInFlight = (async () => {
+    const base = (import.meta.env.VITE_IDENTITY_API_URL ?? "").replace(
+      /\/$/,
+      "",
+    );
+    const response = await fetch(`${base}/auth/refresh`, {
+      method: "POST",
+      credentials: "include",
+    });
+    return response.ok;
+  })().finally(() => {
+    refreshInFlight = null;
+  });
+  return refreshInFlight;
+}
+
 export async function request<T>(
   baseUrl: string,
   path: string,
   options: RequestOptions = {},
 ): Promise<T> {
   const url = `${baseUrl.replace(/\/$/, "")}${path}`;
+  const init = toInit(options);
 
-  const headers = new Headers();
-  if (options.body !== undefined) {
-    headers.set("Content-Type", "application/json");
+  let response = await fetch(url, init);
+
+  if (response.status === 401 && path !== "/auth/refresh") {
+    if (await tryRefresh()) {
+      response = await fetch(url, init);
+    }
   }
-
-  const response = await fetch(url, {
-    method: options.method ?? "GET",
-    headers,
-    credentials: "include",
-    body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
-  });
 
   if (response.status === 401) {
     unauthorizedHandler?.();
@@ -101,8 +132,14 @@ function flattenProblemErrors(errors: unknown): Record<string, string> {
   }
 
   const result: Record<string, string> = {};
-  for (const [key, value] of Object.entries(errors as Record<string, unknown>)) {
-    if (!Array.isArray(value) || typeof value[0] !== "string" || value[0].length === 0) {
+  for (const [key, value] of Object.entries(
+    errors as Record<string, unknown>,
+  )) {
+    if (
+      !Array.isArray(value) ||
+      typeof value[0] !== "string" ||
+      value[0].length === 0
+    ) {
       continue;
     }
     result[key] = value[0];
