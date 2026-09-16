@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import {
+  beginLogin,
   beginLogout,
   getMe,
   registerTenant,
@@ -27,7 +28,9 @@ export const restoreSession = createAsyncThunk(
 export const register = createAsyncThunk(
   "auth/register",
   async (input: { name: string; email: string; password: string }) => {
-    return await registerTenant(input.name, input.email, input.password);
+    const user = await registerTenant(input.name, input.email, input.password);
+    beginLogin();
+    return user;
   },
 );
 

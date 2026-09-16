@@ -18,6 +18,7 @@ export type AuthUser = {
   tenantId: string;
   brokerId: string;
   email: string;
+  role?: string;
 };
 
 export function registerTenant(
