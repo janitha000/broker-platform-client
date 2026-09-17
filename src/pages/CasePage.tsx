@@ -18,6 +18,7 @@ import {
 import { fieldErrorsFromProblem } from "../api/problemDetails";
 import { formatDateTime } from "../helpers/date";
 import { formatMoney } from "../helpers/money";
+import { CaseDocumentsPanel } from "../components/CaseDocumentsPanel";
 
 export function CasePage() {
   const { caseId } = useParams();
@@ -154,6 +155,8 @@ export function CasePage() {
               <dd>{formatDateTime(caseItem.factFind.completedAt)}</dd>
             </dl>
           ) : null}
+
+          <CaseDocumentsPanel caseId={caseItem.caseId} />
         </>
       ) : null}
 

@@ -7,6 +7,7 @@ export default defineConfig({
     proxy: {
       "/auth": { target: "http://localhost:5250", changeOrigin: true },
       "/cases": { target: "http://localhost:5135", changeOrigin: true },
+      "/documents": { target: "http://localhost:5310", changeOrigin: true },
       "/hubs": {
         target: "http://localhost:5290",
         changeOrigin: true,
