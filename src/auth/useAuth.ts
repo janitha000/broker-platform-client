@@ -6,6 +6,7 @@ import {
   selectReady,
   selectUser,
 } from "./authSlice";
+import { canReadAudit } from "./canReadAudit";
 
 export function useAuth() {
   const dispatch = useAppDispatch();
@@ -27,5 +28,5 @@ export function useAuth() {
     await dispatch(signOutThunk()).unwrap();
   }, [dispatch]);
 
-  return { user, ready, register, signOut };
+  return { user, ready, register, signOut, canReadAudit: canReadAudit(user) };
 }

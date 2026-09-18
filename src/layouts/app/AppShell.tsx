@@ -9,7 +9,7 @@ import { useNotificationHub } from "../../realtime/useNotificationHub";
 
 export function AppShell() {
   const location = useLocation();
-  const { user, signOut } = useAuth();
+  const { user, signOut, canReadAudit } = useAuth();
   useNotificationHub();
 
   return (
@@ -40,6 +40,16 @@ export function AppShell() {
         >
           Board
         </NavLink>
+        {canReadAudit ? (
+          <NavLink
+            to="/audit"
+            className={({ isActive }) =>
+              isActive ? styles.current : undefined
+            }
+          >
+            Audit
+          </NavLink>
+        ) : null}
       </nav>
       <main>
         <ErrorBoundary

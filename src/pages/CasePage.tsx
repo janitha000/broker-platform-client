@@ -19,6 +19,7 @@ import { fieldErrorsFromProblem } from "../api/problemDetails";
 import { formatDateTime } from "../helpers/date";
 import { formatMoney } from "../helpers/money";
 import { CaseDocumentsPanel } from "../components/CaseDocumentsPanel";
+import { CaseAuditPanel } from "../components/CaseAuditPanel";
 
 export function CasePage() {
   const { caseId } = useParams();
@@ -157,6 +158,7 @@ export function CasePage() {
           ) : null}
 
           <CaseDocumentsPanel caseId={caseItem.caseId} />
+          <CaseAuditPanel caseId={caseItem.caseId} />
         </>
       ) : null}
 

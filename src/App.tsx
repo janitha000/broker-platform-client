@@ -8,6 +8,7 @@ import { GuestLayout } from "./layouts/public/GuestLayout";
 import { AppShell } from "./layouts/app/AppShell";
 import { CasesLayout } from "./layouts/app/CasesLayout";
 import { BoardPage } from "./cases/BoardPage";
+import { AuditPage } from "./pages/AuditPage";
 
 function AppRoutes() {
   return (
@@ -30,6 +31,7 @@ function AppRoutes() {
           <Route path="board" element={<BoardPage />} />
           <Route path=":caseId" element={<CasePage />} />
         </Route>
+        <Route path="audit" element={<AuditPage />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/cases" replace />} />

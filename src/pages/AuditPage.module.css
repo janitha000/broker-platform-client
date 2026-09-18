@@ -1,0 +1,28 @@
+.lead {
+  margin: calc(var(--space-5) * -1) 0 var(--space-5);
+  color: var(--color-muted);
+  font-size: var(--font-size-sm);
+}
+
+.field {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.field span {
+  font-size: var(--font-size-sm);
+}
+
+.field select {
+  max-width: 100%;
+  padding: var(--space-3) var(--space-4);
+  font: inherit;
+  color: var(--color-text);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.results {
+  margin-top: var(--space-6);
+}

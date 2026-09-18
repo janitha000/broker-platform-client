@@ -28,6 +28,12 @@
   margin-top: var(--space-1);
 }
 
+.heading a {
+  flex-shrink: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-accent);
+}
+
 .form {
   display: grid;
   gap: var(--space-3);

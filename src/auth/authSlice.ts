@@ -6,7 +6,6 @@ import {
   registerTenant,
   type AuthUser,
 } from "../api/identity";
-import { queryClient } from "../api/queryClient";
 
 type AuthState = {
   user: AuthUser | null;

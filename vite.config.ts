@@ -8,6 +8,7 @@ export default defineConfig({
       "/auth": { target: "http://localhost:5250", changeOrigin: true },
       "/cases": { target: "http://localhost:5135", changeOrigin: true },
       "/documents": { target: "http://localhost:5310", changeOrigin: true },
+      "/audit": { target: "http://localhost:5320", changeOrigin: true },
       "/hubs": {
         target: "http://localhost:5290",
         changeOrigin: true,
